@@ -31,6 +31,22 @@ Unlike hardware PWM, this approach allows generating PWM signals on pins that do
 - GPIO pins are toggled accordingly to generate PWM signals
 
 ## Actual Results
+- This is the result after generating two PWM signals on pins PA5 and PA6 with duty cycles of 30% and 60%, respectively.
+```c
+#include "Soft_PWM.h"
+int main()
+{
+  SoftPWM_Init(100);        // Set PWM resolution
+  
+  SoftPWM_AddChannel(GPIOA, GPIO_PIN_5);
+  SoftPWM_AddChannel(GPIOA, GPIO_PIN_6);
+  while(1)
+  {
+    SoftPWM_SetDuty(0, 30);   // CH8 of Logic Analyzer
+    SoftPWM_SetDuty(1, 60);   // CH7 of Logic Analyzer
+  }
+}
+```
 <img width="1457" height="971" alt="RESULT1" src="https://github.com/user-attachments/assets/19679d9f-213a-404f-b93a-a99d8f0a2962" />
 <img width="1487" height="993" alt="RESULT2" src="https://github.com/user-attachments/assets/23ef616d-cc26-4ab0-b272-c0190fc34a5c" />
 
