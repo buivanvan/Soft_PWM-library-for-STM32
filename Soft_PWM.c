@@ -95,7 +95,7 @@ void SoftPWM_Init(uint16_t period)
 		Get_CLK();
 
     TIM2->PSC = 9;     // 1MHz (72MHz / 72)
-    TIM2->ARR = (APB1_CLK/100000) - 1;     // interrupt moi 10µs
+    TIM2->ARR = (APB1_CLK/100000) - 1;     // interrupt moi 10Âµs
 
     TIM2->DIER |= (1<<0);   // Update interrupt enable
     TIM2->CR1  |= (1<<0);   // Enable timer
@@ -104,27 +104,34 @@ void SoftPWM_Init(uint16_t period)
 }
 
 /* ================= ADD CHANNEL ================= */
-uint8_t SoftPWM_AddChannel(GPIO_TypeDef *port, uint16_t pin)
+void SoftPWM_AddChannel(GPIO_TypeDef *port, uint16_t pin)
 {
-    if (channel_count >= SOFT_PWM_MAX_CH) return 0xFF;
+    if (channel_count >= SOFT_PWM_MAX_CH) return ;
 
     GPIO_Output_Init(port, pin);
 
     channels[channel_count].port = port;
     channels[channel_count].pin  = pin;
     channels[channel_count].duty = 0;
-
-    return channel_count++;
+    channels[channel_count].mode = 1;
+	
+		channel_count ++;
 }
 
 /* ================= SET DUTY ================= */
-void SoftPWM_SetDuty(uint8_t ch, uint16_t duty)
+void SoftPWM_SetDuty(uint8_t channel, uint16_t duty)
 {
-    if (ch >= channel_count) return;
+    if (channel >= channel_count) return;
 
     if (duty > pwm_period) duty = pwm_period;
 
-    channels[ch].duty = duty;
+    channels[channel].duty = duty;
+}
+
+/* ================= CHANGE MODE ================= */
+void SoftPWM_ChangeMode(uint8_t channel, uint8_t mode)
+{
+    channels[channel].mode = mode;
 }
 
 /* ================= TIMER ISR ================= */
@@ -142,9 +149,16 @@ void TIM2_IRQHandler(void)
         {
 						pin_ = GPIO_PinToNumber(channels[i].pin);
             if (counter < channels[i].duty)
-                channels[i].port->BSRR |=  (1 << pin_);
+						{
+							if(channels[i].mode == 1) channels[i].port->BSRR |=  (1 << pin_);
+							else channels[i].port->BSRR |= (1 << (pin_ + 16));
+						}
             else
-                channels[i].port->BSRR |= (1 << (pin_ + 16));
+						{
+							if(channels[i].mode == 1) channels[i].port->BSRR |= (1 << (pin_ + 16));
+							else channels[i].port->BSRR |=  (1 << pin_);
+                
+						}
         }
     }
 }
