@@ -61,6 +61,7 @@ SoftPWM_ChangeMode(Channel0, PWM_MODE1);
 ```
 <img width="1271" height="88" alt="image" src="https://github.com/user-attachments/assets/1d292ce0-8f96-458d-944f-2e21489f6e4f" />
 ### When in Mode 2
+
 ```c
 SoftPWM_ChangeMode(Channel0, PWM_MODE2);
 ```
